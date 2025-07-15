@@ -1,69 +1,69 @@
-# React + TypeScript + Vite
+# Refund Validation System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A TypeScript application for validating refund requests based on time zones, business hours, and Terms of Service rules.
 
-Currently, two official plugins are available:
+## Requirements
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node.js 18+
+- npm or yarn
 
-## Expanding the ESLint configuration
+## Setup
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. Clone the repository:
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone git@github.com:Pakul91/further-tech-test.git
+cd further-tech-test
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Install dependencies:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+3. Start the development server:
+
+```bash
+npm run dev
+```
+
+4. Run test (currently only for services):
+
+```bash
+npm run test
+```
+
+5. Open your browser to the URL shown in the terminal (typically http://localhost:5173)
+
+## Project Structure
+
+- `/data`: Contains JSON configuration files
+
+  - `refundRequests.json`: Sample refund requests
+  - `timeLimits.json`: Time limits for refund windows
+  - `timeZoneMapping.json`: Mappings of locations to time zones
+  - `dayOfWeekMapping.json`: Day of week mappings for DayJS
+
+- `/src`: Source code
+  - `/components`: React components
+  - `/dataTransformingService`: Service for transforming dates and time zones
+  - `/refundValidationService`: Service for validating refund requests
+  - `/types`: TypeScript type definitions
+
+## Core Features
+
+- Time zone conversion based on customer location
+- Business hours validation (9am-5pm, weekdays only)
+- Terms of Service type determination (old vs new)
+- Refund window validation based on investment date and request time
+- Detailed validation data display with tooltips
+
+## Technologies
+
+- TypeScript
+- React
+- Vite
+- DayJS (for date/time handling)
+- React-Tooltip
+- Vitest (testing)
