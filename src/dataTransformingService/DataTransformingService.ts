@@ -60,6 +60,7 @@ export default class DataTransformingService {
           ukInvestmentDate,
           ukRefundRequestDate,
           tosType,
+          requestSource: request.requestSource,
         };
 
         acc.push({ ...request, ukTimeRefundRequest });

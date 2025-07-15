@@ -4,15 +4,9 @@ import viteLogo from "/vite.svg";
 import "./App.css";
 import refundRequests from "../data/refundRequests.json";
 import DataTransformingService from "./dataTransformingService/DataTransformingService";
+import RefundValidationService from "./refundValidationService/RefundValidationService";
 
-// Define the interface for formatted data
-interface FormattedData {
-  name: string;
-  customerLocation: string;
-  ukSingUpDate: string;
-  ukInvestmentDate: string;
-  ukRefundRequestDate: string;
-}
+import type { EnhancedRequestData } from "./types/index";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -20,9 +14,16 @@ function App() {
 
   useEffect(() => {
     try {
-      const transformedData =
+      const transformedData: EnhancedRequestData[] =
         DataTransformingService.transformRequestData(refundRequests);
-      setFormattedData(transformedData);
+
+      const withRequestValidation = transformedData.map(
+        (transformedData: EnhancedRequestData) => {
+          RefundValidationService.validateRefundRequest(
+            transformedData.ukTimeRefundRequest
+          );
+        }
+      );
     } catch (error) {
       console.error("Error transforming request data:", error);
     }

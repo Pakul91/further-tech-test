@@ -11,7 +11,7 @@ export interface RequestData {
   name: string;
   customerLocation: string;
   signUpDate: string;
-  requestSource: string;
+  requestSource: RequestSource;
   investmentDate: string;
   investmentTime: string;
   refundRequestDate: string;
@@ -23,6 +23,7 @@ export interface UkTimeRefundRequest {
   ukInvestmentDate: string;
   ukRefundRequestDate: string;
   tosType: TOSType;
+  requestSource: RequestSource;
 }
 
 export interface EnhancedRequestData extends RequestData {
@@ -30,12 +31,12 @@ export interface EnhancedRequestData extends RequestData {
 }
 
 export type TOSType = "oTOS" | "nTOS";
+
 export type RequestSource = "phone" | "web app";
 
-export interface TimeLimitEntry {
-  oTOS: number;
-  nTOS: number;
-}
+export type TimeLimitEntry = {
+  [K in TOSType]: number;
+};
 
 export type TimeLimits = {
   [K in RequestSource]: TimeLimitEntry;
