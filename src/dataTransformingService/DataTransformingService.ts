@@ -19,34 +19,27 @@ dayjs.extend(timezone);
 dayjs.extend(customParseFormat);
 
 export default class DataTransformingService {
+  // Cutoff date for determining which Terms of Service applies to the customer
   static #oTOScutoff: string = "2/1/2020";
 
-  static transformRequestData(requestsData: RequestData): EnhancedRequestData {
-
-    if (!requestsData) {
+  /**
+   * Transforms the raw request data into enhanced data with standardized UK time format.
+   * Converts dates from customer's local timezone to UK time and determines the applicable Terms of Service.
+   */
+  static transformRequestData(requestData: RequestData): EnhancedRequestData {
+    if (!requestData) {
       throw new Error("RequestData is required");
     }
 
-    const customerTimezoneInfo: TimeZoneInfo = this.#getTimezoneInfo(
-      requestsData.customerLocation
-    );
-
-    const ukSingUpDate: string = this.#convertToUkTime(
-      requestsData.signUpDate,
-      customerTimezoneInfo
-    );
-
-    const ukInvestmentDate: string = this.#convertToUkTime(
-      requestsData.investmentDate,
-      customerTimezoneInfo,
-      requestsData.investmentTime
-    );
-
-    const ukRefundRequestDate: string = this.#convertToUkTime(
-      requestsData.refundRequestDate,
-      customerTimezoneInfo,
-      requestsData.refundRequestTime
-    );
+    const {
+      ukSingUpDate,
+      ukInvestmentDate,
+      ukRefundRequestDate,
+    }: {
+      ukSingUpDate: string;
+      ukInvestmentDate: string;
+      ukRefundRequestDate: string;
+    } = this.#convertDates(requestData);
 
     const tosType = this.#addTOStype(ukSingUpDate);
 
@@ -55,15 +48,53 @@ export default class DataTransformingService {
       ukInvestmentDate,
       ukRefundRequestDate,
       tosType,
-      requestSource: requestsData.requestSource as RequestSource,
+      requestSource: requestData.requestSource as RequestSource,
     };
 
     return {
-      ...requestsData,
+      ...requestData,
       ukTimeRefundRequest,
     };
   }
 
+  /**
+   * Converts customer's local date/time values to UK time format.
+   * Retrieves timezone information based on customer location and handles the conversion.
+   */
+  static #convertDates(requestData: RequestData) {
+    const customerTimezoneInfo: TimeZoneInfo = this.#getTimezoneInfo(
+      requestData.customerLocation
+    );
+
+    const ukSingUpDate: string = this.#convertToUkTime(
+      requestData.signUpDate,
+      customerTimezoneInfo
+    );
+
+    const ukInvestmentDate: string = this.#convertToUkTime(
+      requestData.investmentDate,
+      customerTimezoneInfo,
+      requestData.investmentTime
+    );
+
+    const ukRefundRequestDate: string = this.#convertToUkTime(
+      requestData.refundRequestDate,
+      customerTimezoneInfo,
+      requestData.refundRequestTime
+    );
+
+    return {
+      ukSingUpDate,
+      ukInvestmentDate,
+      ukRefundRequestDate,
+    };
+  }
+
+  /**
+   * Converts a date from a source timezone to UK time (Europe/London).
+   * Handles both date-only and date-time conversions using the appropriate format.
+   * Returns the formatted date string in UK format.
+   */
   static #convertToUkTime(
     date: string,
     timezoneInfo: TimeZoneInfo,
@@ -75,11 +106,11 @@ export default class DataTransformingService {
       return dayjs(date, timezoneInfo.dateFormat).format("DD/MM/YYYY");
     }
 
-    const sourceDate = `${date} ${time}`;
-    const sourceFormat = `${timezoneInfo.dateFormat} HH:mm`;
-    const targetFormat = "DD/MM/YYYY HH:mm";
+    const sourceDate: string = `${date} ${time}`;
+    const sourceFormat: string = `${timezoneInfo.dateFormat} HH:mm`;
+    const targetFormat: string = "DD/MM/YYYY HH:mm";
 
-    const formattedDate = dayjs
+    const formattedDate: string = dayjs
       .tz(sourceDate, sourceFormat, timezoneInfo.timezone)
       .tz("Europe/London")
       .format(targetFormat);
@@ -87,15 +118,22 @@ export default class DataTransformingService {
     return formattedDate;
   }
 
+  /**
+   * Retrieves timezone information for a given customer location from the timezone mappings.
+   */
   static #getTimezoneInfo(timezoneName: string) {
     const mappings: TimeZoneMapping = timeZoneMappings;
     return mappings[timezoneName];
   }
 
+  /**
+   * Determines which Terms of Service type applies to the customer based on their sign-up date.
+   * Returns 'nTOS' for new Terms of Service if sign-up is after the cutoff date, otherwise 'oTOS'.
+   */
   static #addTOStype(signUpDate: string): TOSType {
-    const oldTosCutoffDate = dayjs(this.#oTOScutoff, "D/M/YYYY");
-    const signUpDayjs = dayjs(signUpDate, "DD/MM/YYYY");
-    const isAfter = signUpDayjs.isAfter(oldTosCutoffDate);
+    const oldTosCutoffDate: dayjs.Dayjs = dayjs(this.#oTOScutoff, "D/M/YYYY");
+    const signUpDayjs: dayjs.Dayjs = dayjs(signUpDate, "DD/MM/YYYY");
+    const isAfter: boolean = signUpDayjs.isAfter(oldTosCutoffDate);
 
     return isAfter ? "nTOS" : "oTOS";
   }
