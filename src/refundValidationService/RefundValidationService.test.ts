@@ -82,6 +82,15 @@ const VALIDATION_TEST_CASES: [string, UkTimeRefundRequest, boolean][] = [
 ];
 
 describe("RefundValidationService Tests", () => {
+  describe("throwing errors", () => {
+    it("should throw an error if requestData is not provided", () => {
+      expect(() =>
+        // @ts-expect-error: Deliberately passing null to test error handling
+        RefundValidationService.validateRefundRequest(null)
+      ).toThrow();
+    });
+  });
+
   describe("validateRefundRequest", () => {
     it.each(VALIDATION_TEST_CASES)("should %s", (_, request, expected) => {
       const result = RefundValidationService.validateRefundRequest(request);

@@ -24,6 +24,10 @@ export default class RefundValidationService {
   static #timeLimits: TimeLimits = timeLimits;
 
   static validateRefundRequest(requestsData: UkTimeRefundRequest): boolean {
+    if (!requestsData) {
+      throw new Error("requestsData is required");
+    }
+
     // Determine when the request was registered based on the request source
     const registeredRequestTime: string =
       this.#getRequestRegisteredTime(requestsData);
