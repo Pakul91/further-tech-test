@@ -10,6 +10,7 @@ import type {
   TOSType,
   RequestSource,
   TimeLimitEntry,
+  RefundValidationResult,
 } from "../types";
 
 dayjs.extend(utc);
@@ -23,7 +24,9 @@ export default class RefundValidationService {
   static #closingTimes: number = 17;
   static #timeLimits: TimeLimits = timeLimits;
 
-  static validateRefundRequest(requestData: UkTimeRefundRequest): boolean {
+  static validateRefundRequest(
+    requestData: UkTimeRefundRequest
+  ): RefundValidationResult {
     try {
       // Very limited validation to ensure requestData is provided
       // Should be expanded in a real-world scenario
@@ -45,9 +48,18 @@ export default class RefundValidationService {
         requestCutoffDate
       );
 
-      return isRequestValid;
+      const validationReason: string = this.#getValidationReason(
+        isRequestValid,
+        requestData.ukInvestmentDate,
+        registeredRequestTime,
+        requestCutoffDate
+      );
+
+      return {
+        isRequestValid,
+        validationReason,
+      };
     } catch (error) {
-      // Handle the error gracefully
       if (error instanceof Error) {
         throw new Error(`Refund validation failed: ${error.message}`);
       } else {
@@ -154,5 +166,21 @@ export default class RefundValidationService {
   static #getTimeLimit(tosType: TOSType, requestSource: RequestSource): number {
     const timeLimitEntry: TimeLimitEntry = this.#timeLimits[requestSource];
     return timeLimitEntry[tosType];
+  }
+
+  /**
+   * Provides explanation for the validation result with details about the investment date, registered request time, and cutoff date.
+   */
+  static #getValidationReason(
+    isRequestValid: boolean,
+    investmentDate: string,
+    registeredRequestTime: string,
+    requestCutoffDate: dayjs.Dayjs
+  ): string {
+    const isValid = isRequestValid ? "valid" : "invalid";
+
+    return `Refund request is ${isValid}. Investment date: ${investmentDate}, Registered request time: ${registeredRequestTime}, Cutoff date: ${requestCutoffDate.format(
+      "DD/MM/YYYY HH:mm"
+    )}. All dates are in UK time.`;
   }
 }

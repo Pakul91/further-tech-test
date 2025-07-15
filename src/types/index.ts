@@ -41,3 +41,8 @@ export type TimeLimitEntry = {
 export type TimeLimits = {
   [K in RequestSource]: TimeLimitEntry;
 };
+
+export interface RefundValidationResult {
+  isRequestValid: boolean;
+  validationReason: string;
+}

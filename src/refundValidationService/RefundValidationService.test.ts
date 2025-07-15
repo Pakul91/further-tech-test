@@ -94,7 +94,7 @@ describe("RefundValidationService Tests", () => {
   describe("validateRefundRequest", () => {
     it.each(VALIDATION_TEST_CASES)("should %s", (_, request, expected) => {
       const result = RefundValidationService.validateRefundRequest(request);
-      expect(result).toBe(expected);
+      expect(result.isRequestValid).toBe(expected);
     });
   });
 });
