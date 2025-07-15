@@ -22,6 +22,11 @@ export default class DataTransformingService {
   static #oTOScutoff: string = "2/1/2020";
 
   static transformRequestData(requestsData: RequestData): EnhancedRequestData {
+
+    if (!requestsData) {
+      throw new Error("RequestData is required");
+    }
+
     const customerTimezoneInfo: TimeZoneInfo = this.#getTimezoneInfo(
       requestsData.customerLocation
     );
