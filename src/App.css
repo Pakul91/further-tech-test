@@ -1,42 +1,197 @@
 #root {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.app {
+  width: 100vw;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #e0e0e0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    sans-serif;
 }
 
-@keyframes logo-spin {
-  from {
+.container {
+  width: min(90%, 1500px);
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #a0a0a0;
+  margin: 0;
+}
+
+.table-container {
+  background: rgba(30, 30, 30, 0.8);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid #404040;
+  backdrop-filter: blur(10px);
+}
+
+.refund-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.refund-table th {
+  background: #2a2a2a;
+  color: #ffffff;
+  padding: 1rem 0.8rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #404040;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.refund-table td {
+  padding: 0.8rem;
+  border-bottom: 1px solid #333333;
+  vertical-align: top;
+}
+
+.refund-table tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.customer-name {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.location-badge {
+  display: inline-block;
+  background: #3a3a3a;
+  color: #e0e0e0;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.source-badge {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.source-badge.phone {
+  background: #2d5a87;
+  color: #87ceeb;
+}
+
+.source-badge.web-app {
+  background: #4a5d23;
+  color: #9acd32;
+}
+
+.datetime-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.date {
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.time {
+  color: #a0a0a0;
+  font-size: 0.85rem;
+  font-family: "Courier New", monospace;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-badge.valid {
+  background: #1e4d2b;
+  color: #4ade80;
+  border: 1px solid #16a34a;
+}
+
+.status-badge.invalid {
+  background: #4d1e1e;
+  color: #f87171;
+  border: 1px solid #dc2626;
+}
+
+.loading {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #a0a0a0;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #404040;
+  border-top: 3px solid #87ceeb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% {
     transform: rotate(0deg);
   }
-  to {
+  100% {
     transform: rotate(360deg);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+.tooltip {
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
   }
-}
 
-.card {
-  padding: 2em;
-}
+  .header h1 {
+    font-size: 2rem;
+  }
 
-.read-the-docs {
-  color: #888;
+  .refund-table {
+    font-size: 0.8rem;
+  }
+
+  .refund-table th,
+  .refund-table td {
+    padding: 0.6rem 0.4rem;
+  }
 }

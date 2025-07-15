@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timeLimits from "../../data/timeLimits.json";
+import dayOfWeekMapping from "../../data/dayOfWeekMapping.json";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
@@ -11,6 +12,8 @@ import type {
   RequestSource,
   TimeLimitEntry,
   RefundValidationResult,
+  DayOfWeekMapping,
+  ValidationData,
 } from "../types";
 
 dayjs.extend(utc);
@@ -48,9 +51,9 @@ export default class RefundValidationService {
         requestCutoffDate
       );
 
-      const validationReason: string = this.#getValidationReason(
+      const validationReason: ValidationData = this.#getValidationData(
+        requestData,
         isRequestValid,
-        requestData.ukInvestmentDate,
         registeredRequestTime,
         requestCutoffDate
       );
@@ -171,16 +174,50 @@ export default class RefundValidationService {
   /**
    * Provides explanation for the validation result with details about the investment date, registered request time, and cutoff date.
    */
-  static #getValidationReason(
+  static #getValidationData(
+    requestData: UkTimeRefundRequest,
     isRequestValid: boolean,
-    investmentDate: string,
     registeredRequestTime: string,
     requestCutoffDate: dayjs.Dayjs
-  ): string {
+  ): ValidationData {
     const isValid = isRequestValid ? "valid" : "invalid";
 
-    return `Refund request is ${isValid}. Investment date: ${investmentDate}, Registered request time: ${registeredRequestTime}, Cutoff date: ${requestCutoffDate.format(
+    const investmentDate: dayjs.Dayjs = dayjs(
+      requestData.ukInvestmentDate,
       "DD/MM/YYYY HH:mm"
-    )}. All dates are in UK time.`;
+    );
+
+    const requestMadeTime: dayjs.Dayjs = dayjs(
+      requestData.ukRefundRequestDate,
+      "DD/MM/YYYY HH:mm"
+    );
+
+    const registeredRequestTimeFormatted: dayjs.Dayjs = dayjs(
+      registeredRequestTime,
+      "DD/MM/YYYY HH:mm"
+    );
+
+    const timeLimitEntry: number = this.#getTimeLimit(
+      requestData.tosType,
+      requestData.requestSource
+    );
+
+    const dayMapping: DayOfWeekMapping = dayOfWeekMapping;
+
+    return {
+      investmentDate: requestData.ukInvestmentDate,
+      investmentDayOfWeek: dayMapping[investmentDate.day()],
+      requestMadeTime: requestData.ukRefundRequestDate,
+      requestMadeDayOfWeek: dayMapping[requestMadeTime.day()],
+      registeredRequestTime:
+        registeredRequestTimeFormatted.format("DD/MM/YYYY HH:mm"),
+      registeredRequestDayOfWeek:
+        dayMapping[registeredRequestTimeFormatted.day()],
+      requestCutoffDate: requestCutoffDate.format("DD/MM/YYYY HH:mm"),
+      requestCutoffDayOfWeek: dayMapping[requestCutoffDate.day()],
+      isRequestValid: isValid,
+      timeLimit: timeLimitEntry,
+      tosType: requestData.tosType,
+    };
   }
 }

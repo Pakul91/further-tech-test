@@ -30,6 +30,10 @@ export interface EnhancedRequestData extends RequestData {
   ukTimeRefundRequest: UkTimeRefundRequest;
 }
 
+export interface RequestDataWithValidation extends EnhancedRequestData {
+  validation: RefundValidationResult;
+}
+
 export type TOSType = "oTOS" | "nTOS";
 
 export type RequestSource = "phone" | "web app";
@@ -44,5 +48,23 @@ export type TimeLimits = {
 
 export interface RefundValidationResult {
   isRequestValid: boolean;
-  validationReason: string;
+  validationReason: ValidationData;
+}
+
+export interface DayOfWeekMapping {
+  [key: number]: string;
+}
+
+export interface ValidationData {
+  investmentDate: string;
+  investmentDayOfWeek: string;
+  requestMadeTime: string;
+  requestMadeDayOfWeek: string;
+  registeredRequestTime: string;
+  registeredRequestDayOfWeek: string;
+  requestCutoffDate: string;
+  requestCutoffDayOfWeek: string;
+  isRequestValid: string;
+  timeLimit: number;
+  tosType: TOSType;
 }
