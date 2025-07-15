@@ -27,6 +27,8 @@ export default class DataTransformingService {
    * Converts dates from customer's local timezone to UK time and determines the applicable Terms of Service.
    */
   static transformRequestData(requestData: RequestData): EnhancedRequestData {
+    // Very limited validation to ensure requestData is provided
+    // Should be expanded in a real-world scenario
     if (!requestData) {
       throw new Error("RequestData is required");
     }

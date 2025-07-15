@@ -23,18 +23,20 @@ export default class RefundValidationService {
   static #closingTimes: number = 17;
   static #timeLimits: TimeLimits = timeLimits;
 
-  static validateRefundRequest(requestsData: UkTimeRefundRequest): boolean {
-    if (!requestsData) {
-      throw new Error("requestsData is required");
+  static validateRefundRequest(requestData: UkTimeRefundRequest): boolean {
+    // Very limited validation to ensure requestData is provided
+    // Should be expanded in a real-world scenario
+    if (!requestData) {
+      throw new Error("requestData is required");
     }
 
     // Determine when the request was registered based on the request source
     const registeredRequestTime: string =
-      this.#getRequestRegisteredTime(requestsData);
+      this.#getRequestRegisteredTime(requestData);
 
     // Get cutoff for the refund request for the given investment
     const requestCutoffDate: dayjs.Dayjs =
-      this.#getRequestCutoffDate(requestsData);
+      this.#getRequestCutoffDate(requestData);
 
     // Validate the request
     const isRequestValid: boolean = this.#validateRequest(
@@ -50,13 +52,13 @@ export default class RefundValidationService {
    * For web app requests, it uses the refund request date.
    * For phone requests, it checks if the request is made during business hours and returns the appropriate time.
    */
-  static #getRequestRegisteredTime(requestsData: UkTimeRefundRequest): string {
-    if (requestsData.requestSource === "web app") {
-      return requestsData.ukRefundRequestDate;
+  static #getRequestRegisteredTime(requestData: UkTimeRefundRequest): string {
+    if (requestData.requestSource === "web app") {
+      return requestData.ukRefundRequestDate;
     }
 
     const refundDate = dayjs(
-      requestsData.ukRefundRequestDate,
+      requestData.ukRefundRequestDate,
       "DD/MM/YYYY HH:mm"
     );
 
@@ -68,7 +70,7 @@ export default class RefundValidationService {
       !isWeekend && !isBeforeOpeningTime && !isAfterClosingTime;
 
     if (isValidPhoneTime) {
-      return requestsData.ukRefundRequestDate;
+      return requestData.ukRefundRequestDate;
     }
 
     return this.#findNextAvailableTime(
@@ -113,14 +115,14 @@ export default class RefundValidationService {
    * Calculates the cutoff date for a refund request based on the terms of service type and request source.
    * The cutoff date is determined by the investment date and the time limit defined in the time limits configuration.
    */
-  static #getRequestCutoffDate(requestsData: UkTimeRefundRequest): dayjs.Dayjs {
+  static #getRequestCutoffDate(requestData: UkTimeRefundRequest): dayjs.Dayjs {
     const timeLimit = this.#getTimeLimit(
-      requestsData.tosType,
-      requestsData.requestSource
+      requestData.tosType,
+      requestData.requestSource
     );
 
     const investmentDate = dayjs(
-      requestsData.ukInvestmentDate,
+      requestData.ukInvestmentDate,
       "DD/MM/YYYY HH:mm"
     );
     return investmentDate.add(timeLimit, "hour");
