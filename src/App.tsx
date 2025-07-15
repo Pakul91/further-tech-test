@@ -105,13 +105,12 @@ function App() {
                         {item.validation.isRequestValid ? "Valid" : "Invalid"}
                       </span>
                       <Tooltip
+                        key={`${index}-tooltip`}
                         id={`tooltip-${index}`}
+                        opacity={1}
+                        border="1px solid #404040"
                         className="tooltip"
-                        style={{
-                          maxWidth: "400px",
-                          background: "#333",
-                          opacity: 1,
-                        }}
+                        delayShow={500}
                         place="left"
                       >
                         <ValidationData

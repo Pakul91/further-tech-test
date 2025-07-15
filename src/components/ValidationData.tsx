@@ -25,7 +25,8 @@ const ValidationData: React.FC<ValidationDataProps> = ({ data }) => {
           {data.investmentDayOfWeek})
         </div>
         <div className="validation-item">
-          <strong>TOS Type:</strong> {data.tosType}
+          <strong>TOS Type:</strong>{" "}
+          {data.tosType === "oTOS" ? "Old TOS" : "New TOS"}
         </div>
       </div>
 
