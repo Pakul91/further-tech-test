@@ -2,28 +2,18 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import timeZoneMappings from "../../data/timeZoneMapping.json";
+import customParseFormat from "dayjs/plugin/customParseFormat.js";
 
-interface RequestData {
-  name: string;
-  customerLocation: string;
-  signUpDate: string;
-  requestSource: string;
-  investmentDate: string;
-  investmentTime: string;
-  refundRequestDate: string;
-  refundRequestTime: string;
-}
-
-interface FormattedData {
-  name: string;
-  customerLocation: string;
-  ukSingUpDate: string;
-  ukInvestmentDate: string;
-  ukRefundRequestDate: string;
-}
+import type {
+  TimeZoneMapping,
+  TimeZoneInfo,
+  RequestData,
+  FormattedData,
+} from "../types";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(customParseFormat);
 
 export default class DataTransformingService {
   static transformRequestData(requestsData: RequestData[]): FormattedData[] {
@@ -31,18 +21,74 @@ export default class DataTransformingService {
       throw new TypeError("Requests data needs to be an array!");
     }
 
-    console.log("requestsData", requestsData);
+    const formattedData = requestsData.reduce(
+      (acc: FormattedData[], request: RequestData): FormattedData[] => {
+        const customerTimezoneInfo: TimeZoneInfo = this.#getTimezoneInfo(
+          request.customerLocation
+        );
 
-    return requestsData.map((request) => ({
-      name: request.name,
-      customerLocation: request.customerLocation,
-      ukSingUpDate: request.signUpDate,
-      ukInvestmentDate: `${request.investmentDate} ${request.investmentTime}`,
-      ukRefundRequestDate: `${request.refundRequestDate} ${request.refundRequestTime}`,
-    }));
+        const data = {
+          name: request.name,
+          ukSingUpDate: this.#convertToUkTime(
+            request.signUpDate,
+            customerTimezoneInfo
+          ),
+          ukInvestmentDate: this.#convertToUkTime(
+            request.investmentDate,
+            customerTimezoneInfo,
+            request.investmentTime
+          ),
+          ukRefundRequestDate: this.#convertToUkTime(
+            request.refundRequestDate,
+            customerTimezoneInfo,
+            request.refundRequestTime
+          ),
+        };
+
+        acc.push(data);
+        return acc;
+      },
+      []
+    );
+
+    return formattedData;
   }
 
-  static #convertToUkTime() {}
+  static #convertToUkTime(
+    date: string,
+    timezoneInfo: TimeZoneInfo,
+    time?: string
+  ): string {
+    const hasTime = !!time;
 
-  static #addTOCtype();
+    if (!hasTime) {
+      return dayjs(date, timezoneInfo.dateFormat).format("DD/MM/YYYY");
+    }
+
+    const sourceDate = `${date} ${time}`;
+    const sourceFormat = `${timezoneInfo.dateFormat} HH:mm`;
+    const targetFormat = "DD/MM/YYYY HH:mm";
+
+    const formattedDate = dayjs
+      .tz(sourceDate, sourceFormat, timezoneInfo.timezone)
+      .tz("Europe/London")
+      .format(targetFormat);
+
+    return formattedDate;
+
+    //check withing time. Between, sameafter, samebofer,
+    //check delta time use differnce/or check latest time
+
+    // const localTime = dayjs.tz(dateTime, format, timezone);
+
+    // Convert to UK time (Europe/London)
+    // return localTime.tz("Europe/London").format("YYYY-MM-DD HH:mm:ss");
+  }
+
+  static #getTimezoneInfo(timezoneName: string) {
+    const mappings: TimeZoneMapping = timeZoneMappings;
+    return mappings[timezoneName];
+  }
+
+  static #addTOCtype() {}
 }
