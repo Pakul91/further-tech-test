@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import DataTransformingService from "../../src/dataTransformingService/DataTransformingService";
-import type { RequestData, UkTimeRefundRequest } from "../../src/types";
+import DataTransformingService from "./DataTransformingService";
+import type { RequestData, UkTimeRefundRequest } from "../types";
 
 // Sample request data for testing
 const US_PST_REQUEST: RequestData = {
@@ -169,6 +169,7 @@ const TEST_CASES: [string, RequestData, UkTimeRefundRequest][] = [
 describe("DataTransformingService Integration Tests", () => {
   describe("throwing errors", () => {
     it("should throw an error if requestData is not provided", () => {
+      // @ts-expect-error: Deliberately passing null to test error handling
       expect(() => DataTransformingService.transformRequestData(null)).toThrow(
         "RequestData is required"
       );

@@ -105,7 +105,7 @@ export default class RefundValidationService {
     const requestDate = dayjs(registeredRequestTime, "DD/MM/YYYY HH:mm");
     const cutoffDate = investmentDate.add(timeLimit, "hour");
 
-    return requestDate.isSameOrBefore(cutoffDate, "hour");
+    return requestDate.isSameOrBefore(cutoffDate, "minute");
   }
 
   static #getTimeLimit(tosType: TOSType, requestSource: RequestSource): number {
