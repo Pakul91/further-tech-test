@@ -23,4 +23,5 @@ export interface FormattedData {
   ukSingUpDate: string;
   ukInvestmentDate: string;
   ukRefundRequestDate: string;
+  tosType: "oTOS" | "nTOS";
 }

@@ -16,6 +16,8 @@ dayjs.extend(timezone);
 dayjs.extend(customParseFormat);
 
 export default class DataTransformingService {
+  static #oTOScutoff: string = "2/1/2020";
+
   static transformRequestData(requestsData: RequestData[]): FormattedData[] {
     if (!Array.isArray(requestsData)) {
       throw new TypeError("Requests data needs to be an array!");
@@ -27,22 +29,31 @@ export default class DataTransformingService {
           request.customerLocation
         );
 
+        const ukSingUpDate: string = this.#convertToUkTime(
+          request.signUpDate,
+          customerTimezoneInfo
+        );
+
+        const ukInvestmentDate: string = this.#convertToUkTime(
+          request.investmentDate,
+          customerTimezoneInfo,
+          request.investmentTime
+        );
+
+        const ukRefundRequestDate: string = this.#convertToUkTime(
+          request.refundRequestDate,
+          customerTimezoneInfo,
+          request.refundRequestTime
+        );
+
+        const tosType = this.#addTOStype(ukSingUpDate);
+
         const data = {
           name: request.name,
-          ukSingUpDate: this.#convertToUkTime(
-            request.signUpDate,
-            customerTimezoneInfo
-          ),
-          ukInvestmentDate: this.#convertToUkTime(
-            request.investmentDate,
-            customerTimezoneInfo,
-            request.investmentTime
-          ),
-          ukRefundRequestDate: this.#convertToUkTime(
-            request.refundRequestDate,
-            customerTimezoneInfo,
-            request.refundRequestTime
-          ),
+          ukSingUpDate,
+          ukInvestmentDate,
+          ukRefundRequestDate,
+          tosType,
         };
 
         acc.push(data);
@@ -90,5 +101,11 @@ export default class DataTransformingService {
     return mappings[timezoneName];
   }
 
-  static #addTOCtype() {}
+  static #addTOStype(signUpDate: string): "oTOS" | "nTOS" {
+    const oldTosCutoffDate = dayjs(this.#oTOScutoff, "D/M/YYYY");
+    const signUpDayjs = dayjs(signUpDate, "DD/MM/YYYY");
+    const isAfter = signUpDayjs.isAfter(oldTosCutoffDate);
+
+    return isAfter ? "nTOS" : "oTOS";
+  }
 }
