@@ -8,6 +8,7 @@ import type {
   TimeZoneMapping,
   TimeZoneInfo,
   RequestData,
+  RequestSource,
   UkTimeRefundRequest,
   EnhancedRequestData,
   TOSType,
@@ -20,56 +21,42 @@ dayjs.extend(customParseFormat);
 export default class DataTransformingService {
   static #oTOScutoff: string = "2/1/2020";
 
-  static transformRequestData(
-    requestsData: RequestData[]
-  ): EnhancedRequestData[] {
-    if (!Array.isArray(requestsData)) {
-      throw new TypeError("Requests data needs to be an array!");
-    }
-
-    const enhancedData = requestsData.reduce(
-      (
-        acc: EnhancedRequestData[],
-        request: RequestData
-      ): EnhancedRequestData[] => {
-        const customerTimezoneInfo: TimeZoneInfo = this.#getTimezoneInfo(
-          request.customerLocation
-        );
-
-        const ukSingUpDate: string = this.#convertToUkTime(
-          request.signUpDate,
-          customerTimezoneInfo
-        );
-
-        const ukInvestmentDate: string = this.#convertToUkTime(
-          request.investmentDate,
-          customerTimezoneInfo,
-          request.investmentTime
-        );
-
-        const ukRefundRequestDate: string = this.#convertToUkTime(
-          request.refundRequestDate,
-          customerTimezoneInfo,
-          request.refundRequestTime
-        );
-
-        const tosType = this.#addTOStype(ukSingUpDate);
-
-        const ukTimeRefundRequest: UkTimeRefundRequest = {
-          ukSingUpDate,
-          ukInvestmentDate,
-          ukRefundRequestDate,
-          tosType,
-          requestSource: request.requestSource,
-        };
-
-        acc.push({ ...request, ukTimeRefundRequest });
-        return acc;
-      },
-      []
+  static transformRequestData(requestsData: RequestData): EnhancedRequestData {
+    const customerTimezoneInfo: TimeZoneInfo = this.#getTimezoneInfo(
+      requestsData.customerLocation
     );
 
-    return enhancedData;
+    const ukSingUpDate: string = this.#convertToUkTime(
+      requestsData.signUpDate,
+      customerTimezoneInfo
+    );
+
+    const ukInvestmentDate: string = this.#convertToUkTime(
+      requestsData.investmentDate,
+      customerTimezoneInfo,
+      requestsData.investmentTime
+    );
+
+    const ukRefundRequestDate: string = this.#convertToUkTime(
+      requestsData.refundRequestDate,
+      customerTimezoneInfo,
+      requestsData.refundRequestTime
+    );
+
+    const tosType = this.#addTOStype(ukSingUpDate);
+
+    const ukTimeRefundRequest: UkTimeRefundRequest = {
+      ukSingUpDate,
+      ukInvestmentDate,
+      ukRefundRequestDate,
+      tosType,
+      requestSource: requestsData.requestSource as RequestSource,
+    };
+
+    return {
+      ...requestsData,
+      ukTimeRefundRequest,
+    };
   }
 
   static #convertToUkTime(
@@ -93,14 +80,6 @@ export default class DataTransformingService {
       .format(targetFormat);
 
     return formattedDate;
-
-    //check withing time. Between, sameafter, samebofer,
-    //check delta time use differnce/or check latest time
-
-    // const localTime = dayjs.tz(dateTime, format, timezone);
-
-    // Convert to UK time (Europe/London)
-    // return localTime.tz("Europe/London").format("YYYY-MM-DD HH:mm:ss");
   }
 
   static #getTimezoneInfo(timezoneName: string) {

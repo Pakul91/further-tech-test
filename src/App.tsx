@@ -6,27 +6,27 @@ import refundRequests from "../data/refundRequests.json";
 import DataTransformingService from "./dataTransformingService/DataTransformingService";
 import RefundValidationService from "./refundValidationService/RefundValidationService";
 
-import type { EnhancedRequestData } from "./types/index";
+import type { EnhancedRequestData, RequestData } from "./types/index";
 
 function App() {
   const [count, setCount] = useState(0);
   const [formattedData, setFormattedData] = useState<FormattedData[]>([]);
 
   useEffect(() => {
-    try {
-      const transformedData: EnhancedRequestData[] =
-        DataTransformingService.transformRequestData(refundRequests);
+    const rawRefundRequests: RequestData[] = refundRequests;
 
-      const withRequestValidation = transformedData.map(
-        (transformedData: EnhancedRequestData) => {
-          RefundValidationService.validateRefundRequest(
-            transformedData.ukTimeRefundRequest
-          );
-        }
-      );
-    } catch (error) {
-      console.error("Error transforming request data:", error);
-    }
+    const transformedData: EnhancedRequestData[] = rawRefundRequests.map(
+      (requestData: RequestData) =>
+        DataTransformingService.transformRequestData(requestData)
+    );
+
+    const withRequestValidation = transformedData.map(
+      (transformedData: EnhancedRequestData) => {
+        RefundValidationService.validateRefundRequest(
+          transformedData.ukTimeRefundRequest
+        );
+      }
+    );
   }, []);
 
   return (

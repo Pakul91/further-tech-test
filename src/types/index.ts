@@ -11,7 +11,7 @@ export interface RequestData {
   name: string;
   customerLocation: string;
   signUpDate: string;
-  requestSource: RequestSource;
+  requestSource: string;
   investmentDate: string;
   investmentTime: string;
   refundRequestDate: string;
