@@ -18,10 +18,25 @@ export interface RequestData {
   refundRequestTime: string;
 }
 
-export interface FormattedData {
-  name: string;
+export interface UkTimeRefundRequest {
   ukSingUpDate: string;
   ukInvestmentDate: string;
   ukRefundRequestDate: string;
-  tosType: "oTOS" | "nTOS";
+  tosType: TOSType;
 }
+
+export interface EnhancedRequestData extends RequestData {
+  ukTimeRefundRequest: UkTimeRefundRequest;
+}
+
+export type TOSType = "oTOS" | "nTOS";
+export type RequestSource = "phone" | "web app";
+
+export interface TimeLimitEntry {
+  oTOS: number;
+  nTOS: number;
+}
+
+export type TimeLimits = {
+  [K in RequestSource]: TimeLimitEntry;
+};

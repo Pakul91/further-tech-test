@@ -8,7 +8,9 @@ import type {
   TimeZoneMapping,
   TimeZoneInfo,
   RequestData,
-  FormattedData,
+  UkTimeRefundRequest,
+  EnhancedRequestData,
+  TOSType,
 } from "../types";
 
 dayjs.extend(utc);
@@ -18,13 +20,18 @@ dayjs.extend(customParseFormat);
 export default class DataTransformingService {
   static #oTOScutoff: string = "2/1/2020";
 
-  static transformRequestData(requestsData: RequestData[]): FormattedData[] {
+  static transformRequestData(
+    requestsData: RequestData[]
+  ): EnhancedRequestData[] {
     if (!Array.isArray(requestsData)) {
       throw new TypeError("Requests data needs to be an array!");
     }
 
-    const formattedData = requestsData.reduce(
-      (acc: FormattedData[], request: RequestData): FormattedData[] => {
+    const enhancedData = requestsData.reduce(
+      (
+        acc: EnhancedRequestData[],
+        request: RequestData
+      ): EnhancedRequestData[] => {
         const customerTimezoneInfo: TimeZoneInfo = this.#getTimezoneInfo(
           request.customerLocation
         );
@@ -48,21 +55,20 @@ export default class DataTransformingService {
 
         const tosType = this.#addTOStype(ukSingUpDate);
 
-        const data = {
-          name: request.name,
+        const ukTimeRefundRequest: UkTimeRefundRequest = {
           ukSingUpDate,
           ukInvestmentDate,
           ukRefundRequestDate,
           tosType,
         };
 
-        acc.push(data);
+        acc.push({ ...request, ukTimeRefundRequest });
         return acc;
       },
       []
     );
 
-    return formattedData;
+    return enhancedData;
   }
 
   static #convertToUkTime(
@@ -101,7 +107,7 @@ export default class DataTransformingService {
     return mappings[timezoneName];
   }
 
-  static #addTOStype(signUpDate: string): "oTOS" | "nTOS" {
+  static #addTOStype(signUpDate: string): TOSType {
     const oldTosCutoffDate = dayjs(this.#oTOScutoff, "D/M/YYYY");
     const signUpDayjs = dayjs(signUpDate, "DD/MM/YYYY");
     const isAfter = signUpDayjs.isAfter(oldTosCutoffDate);
