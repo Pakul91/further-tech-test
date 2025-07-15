@@ -27,36 +27,44 @@ export default class DataTransformingService {
    * Converts dates from customer's local timezone to UK time and determines the applicable Terms of Service.
    */
   static transformRequestData(requestData: RequestData): EnhancedRequestData {
-    // Very limited validation to ensure requestData is provided
-    // Should be expanded in a real-world scenario
-    if (!requestData) {
-      throw new Error("RequestData is required");
+    try {
+      // Very limited validation to ensure requestData is provided
+      // Should be expanded in a real-world scenario
+      if (!requestData) {
+        throw new Error("RequestData is required");
+      }
+
+      const {
+        ukSingUpDate,
+        ukInvestmentDate,
+        ukRefundRequestDate,
+      }: {
+        ukSingUpDate: string;
+        ukInvestmentDate: string;
+        ukRefundRequestDate: string;
+      } = this.#convertDates(requestData);
+
+      const tosType = this.#addTOStype(ukSingUpDate);
+
+      const ukTimeRefundRequest: UkTimeRefundRequest = {
+        ukSingUpDate,
+        ukInvestmentDate,
+        ukRefundRequestDate,
+        tosType,
+        requestSource: requestData.requestSource as RequestSource,
+      };
+
+      return {
+        ...requestData,
+        ukTimeRefundRequest,
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Data transformation failed: ${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred during data transformation");
+      }
     }
-
-    const {
-      ukSingUpDate,
-      ukInvestmentDate,
-      ukRefundRequestDate,
-    }: {
-      ukSingUpDate: string;
-      ukInvestmentDate: string;
-      ukRefundRequestDate: string;
-    } = this.#convertDates(requestData);
-
-    const tosType = this.#addTOStype(ukSingUpDate);
-
-    const ukTimeRefundRequest: UkTimeRefundRequest = {
-      ukSingUpDate,
-      ukInvestmentDate,
-      ukRefundRequestDate,
-      tosType,
-      requestSource: requestData.requestSource as RequestSource,
-    };
-
-    return {
-      ...requestData,
-      ukTimeRefundRequest,
-    };
   }
 
   /**

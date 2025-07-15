@@ -24,27 +24,36 @@ export default class RefundValidationService {
   static #timeLimits: TimeLimits = timeLimits;
 
   static validateRefundRequest(requestData: UkTimeRefundRequest): boolean {
-    // Very limited validation to ensure requestData is provided
-    // Should be expanded in a real-world scenario
-    if (!requestData) {
-      throw new Error("requestData is required");
+    try {
+      // Very limited validation to ensure requestData is provided
+      // Should be expanded in a real-world scenario
+      if (!requestData) {
+        throw new Error("requestData is required");
+      }
+
+      // Determine when the request was registered based on the request source
+      const registeredRequestTime: string =
+        this.#getRequestRegisteredTime(requestData);
+
+      // Get cutoff for the refund request for the given investment
+      const requestCutoffDate: dayjs.Dayjs =
+        this.#getRequestCutoffDate(requestData);
+
+      // Validate the request
+      const isRequestValid: boolean = this.#validateRequest(
+        registeredRequestTime,
+        requestCutoffDate
+      );
+
+      return isRequestValid;
+    } catch (error) {
+      // Handle the error gracefully
+      if (error instanceof Error) {
+        throw new Error(`Refund validation failed: ${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred during validation");
+      }
     }
-
-    // Determine when the request was registered based on the request source
-    const registeredRequestTime: string =
-      this.#getRequestRegisteredTime(requestData);
-
-    // Get cutoff for the refund request for the given investment
-    const requestCutoffDate: dayjs.Dayjs =
-      this.#getRequestCutoffDate(requestData);
-
-    // Validate the request
-    const isRequestValid: boolean = this.#validateRequest(
-      registeredRequestTime,
-      requestCutoffDate
-    );
-
-    return isRequestValid;
   }
 
   /**
