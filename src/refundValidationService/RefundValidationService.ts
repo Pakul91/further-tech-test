@@ -1,14 +1,20 @@
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
 import timeLimits from "../../data/timeLimits.json";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
-import type { UkTimeRefundRequest, TimeLimits } from "../types";
+import type {
+  UkTimeRefundRequest,
+  TimeLimits,
+  TOSType,
+  RequestSource,
+  TimeLimitEntry,
+} from "../types";
 
 dayjs.extend(utc);
-dayjs.extend(timezone);
 dayjs.extend(customParseFormat);
+dayjs.extend(isSameOrBefore);
 
 export default class RefundValidationService {
   static #weekendDays: number[] = [0, 6]; // In DayJs these represent [Sunday, Saturday]
@@ -20,6 +26,12 @@ export default class RefundValidationService {
   static validateRefundRequest(requestsData: UkTimeRefundRequest): boolean {
     const registeredRequestTime: string =
       this.#getRequestRegisteredTime(requestsData);
+    const validateRequest: boolean = this.#validateRequest(
+      requestsData,
+      registeredRequestTime
+    );
+
+    return validateRequest;
   }
 
   static #getRequestRegisteredTime(requestsData: UkTimeRefundRequest): string {
@@ -74,5 +86,30 @@ export default class RefundValidationService {
     }
 
     return firstAvailableTime.format("DD/MM/YYYY HH:mm");
+  }
+
+  static #validateRequest(
+    requestsData: UkTimeRefundRequest,
+    registeredRequestTime: string
+  ): boolean {
+    const timeLimit = this.#getTimeLimit(
+      requestsData.tosType,
+      requestsData.requestSource
+    );
+
+    const investmentDate = dayjs(
+      requestsData.ukInvestmentDate,
+      "DD/MM/YYYY HH:mm"
+    );
+
+    const requestDate = dayjs(registeredRequestTime, "DD/MM/YYYY HH:mm");
+    const cutoffDate = investmentDate.add(timeLimit, "hour");
+
+    return requestDate.isSameOrBefore(cutoffDate, "hour");
+  }
+
+  static #getTimeLimit(tosType: TOSType, requestSource: RequestSource): number {
+    const timeLimitEntry: TimeLimitEntry = this.#timeLimits[requestSource];
+    return timeLimitEntry[tosType];
   }
 }
